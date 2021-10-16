@@ -1,0 +1,90 @@
+---
+title: "p8105_hw3_kw2961"
+author: "Kaitlyn Wang"
+date: "10/14/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+library(lubridate)
+```
+
+## Problem 1
+
+The instacart dataset contains `r nrow(instacart)` rows and `r ncol(instacart)` columns. Each row represents one single item with information about its id, name, aisle, department and the user id of the people who order the item. Shown below is a bargraph of the departments with more than 50000 items sold. 
+
+```{r}
+data("instacart")
+
+total_num = 
+  instacart %>% 
+  group_by(department) %>% 
+  summarise(num = n()) %>% 
+  filter(num >= 50000)
+
+ggplot(total_num, aes(x = department, y = num)) + geom_bar(stat = "identity") + coord_flip()
+```
+
+
+```{r}
+#How many aisles are there, and which aisles are the most items ordered from?
+aisles = 
+  instacart %>% 
+  group_by(aisle) %>% 
+  summarise(num = n()) %>% 
+  arrange(desc(num))
+```
+
+There are `r nrow(aisles)` aisles and the fresh vegetables aisle is where the most items are ordered from. 
+
+
+```{r}
+#Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
+aisles %>% 
+  filter(num > 10000) %>%
+  ggplot(aes(x = reorder(aisle, num), y = num)) + geom_bar(stat = "identity") + coord_flip() + labs(y = "Number or Items", x = "Aisles")
+```
+
+
+```{r}
+#Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+most_pop = 
+  instacart %>% 
+    select(product_name, aisle) %>% 
+    filter(aisle == "baking ingredients" | 
+           aisle == "dog food care" | 
+           aisle == "packaged vegetables fruits") %>% 
+    group_by(aisle, product_name) %>% 
+    summarise(num = n()) %>% 
+    arrange(desc(num), .by_group = TRUE) %>% 
+    group_by(aisle) %>% 
+    slice(1:3)
+```
+
+The top three items in the baking ingredients aisle are Light Brown Sugar, Pure Baking Soda and Cane Sugar. The top three items in the dog food care aisle are Snack Sticks Chicken & Rice Recipe Dog Treats, Organix Chicken & Brown Rice Recipe and Small Dog Biscuits. The top three items in the packaged vegetables fruits aisle are Organic Baby Spinach, Organic Raspberries and Organic Blueberries. 
+
+
+```{r}
+#Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+mean_hour = 
+  instacart %>% 
+  select(product_name, order_dow, order_hour_of_day) %>% 
+  filter(
+    product_name == "Pink Lady Apples" |
+    product_name == "Coffee Ice Cream"
+  ) %>% 
+  group_by(product_name, order_dow) %>% 
+  summarise(mean = round(sum(order_hour_of_day)/n(), digits = 0)) %>% 
+  rename(week = order_dow) %>% 
+  mutate(week = week + 1) %>%
+  mutate(week = wday(week, label = TRUE)) %>% 
+  pivot_wider(
+    names_from = "week",
+    values_from = mean
+  )
+```
+
