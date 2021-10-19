@@ -161,3 +161,26 @@ ggplot(ny, aes(x = response, y = data_value, color = county)) +
 ```
 
 
+## Prblem 3
+
+```{r}
+accel = read_csv("./data/accel_data.csv")
+```
+
+```{r}
+new = 
+  accel %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    weekday_weekend = ifelse(day == c("Saturday", "Sunday"), "weekend", "weekday")
+  ) %>% 
+  relocate(weekday_weekend, .after = day) %>% 
+  mutate(day = factor(day, levels = c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
+```
+
+The dataset includes 5 weeks/35 days of observations. The activity_* columns represent the data collected in each minute of the day. There are `r ncol(new) - 4` data being recorded each day. The week, day and day types are shown in the table. 
+
+```{r}
+
+```
+
